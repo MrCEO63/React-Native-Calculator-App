@@ -1,5 +1,7 @@
-#My Phone 
-![](assets/phone-version.png)
+# My Phone 
 
-#My Clone
-![](assets/app-img.png)
+<img src="assets/phone-version.png" alt="My Phone" width="200" />
+
+# My Clone
+
+<img src="assets/app-img.png" alt="My Phone" width="200" />
