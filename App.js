@@ -1,129 +1,123 @@
-import * as React from "react";
-import { Alert, Text, View, StyleSheet } from "react-native";
-import Constants from "expo-constants";
+import React, { Fragment, useState, useEffect } from "react";
+import { Alert, Text, View, SafeAreaView, StyleSheet } from "react-native";
+import * as Font from "expo-font";
 import { Button } from "react-native-elements";
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      result: "",
-      numberInput: "",
-      operationInput: "",
-      displayInput: "",
-      showClear: false
-    };
-  }
+// Components
+import DisplayScreen from "./components/DisplayScreen";
+import GridKeys from "./components/GridKeys";
+import ColKeys from "./components/ColKeys";
+import HiddenGridButtons from "./components/HiddenGridButtons";
 
-  operand: Number = null;
-  prevInput: Number = null;
-  prevOp: String = null;
+//button data {}
+import data from "./constants/button.json";
 
-  handleNumberPress = value => {
+const App = () => {
+  const [state, setState] = useState({
+    isFontLoaded: false,
+    displayInput: "",
+    result: "",
+    numberInput: "",
+    operatorInput: "",
+    showClear: false,
+  });
+
+  useEffect(() => {
+    (async () => {
+      await Font.loadAsync({
+        "OpenSans-Light": require("./assets/fonts/OpenSans-Light.ttf"),
+        "OpenSans-Regular": require("./assets/fonts/OpenSans-Regular.ttf"),
+      });
+      setState({ ...state, isFontLoaded: true });
+    })();
+  }, []);
+
+  let operand: Number = null;
+  let prevInput: Number = null;
+  let prevOp: String = null;
+
+  const handleNumberPress = (value) => {
     let newNumberInput: Number = null;
     let newDisplayInput: Number = null;
-    if (value == "." && this.state.numberInput.includes(".")) return;
+    if (value == "." && state.numberInput.includes(".")) return;
     newDisplayInput =
-      this.state.displayInput == "0" && value != "."
+      state.displayInput == "0" && value != "."
         ? value
-        : this.state.displayInput + "" + value;
+        : state.displayInput + "" + value;
     newNumberInput =
-      this.state.numberInput == "0" && value != "."
+      state.numberInput == "0" && value != "."
         ? value
-        : this.state.numberInput + "" + value;
+        : state.numberInput + "" + value;
 
-    if (this.state.result !== "" && this.state.operationInput === "") {
+    if (state.result !== "" && state.operatorInput === "") {
       if (value == ".") {
-        newDisplayInput = this.state.displayInput + ".";
-        newNumberInput = this.state.numberInput + ".";
+        newDisplayInput = state.displayInput + ".";
+        newNumberInput = state.numberInput + ".";
       }
-      this.setState({
+      setState({
+        ...state,
         numberInput: newNumberInput,
-        displayInput: newDisplayInput
+        displayInput: newDisplayInput,
       });
-      return this.performOperation(newNumberInput, this.prevOp);
-    } else if (this.state.result !== "" && this.state.operationInput !== "") {
-      this.prevInput = this.state.result;
+      return performOperation(newNumberInput, prevOp);
+    } else if (state.result !== "" && state.operatorInput !== "") {
+      prevInput = state.result;
     }
-    this.setState({
+    setState({
+      ...state,
       numberInput: newNumberInput,
-      displayInput: newDisplayInput
+      displayInput: newDisplayInput,
     });
-    if (null != this.operand) {
-      this.performOperation(value, this.state.operationInput);
+    if (null != operand) {
+      performOperation(value, state.operatorInput);
     }
   };
 
-  handleOperationPress = operation => {
-    if (operation !== "=") {
+  const handleOperationPress = (operator) => {
+    if (operator !== "=") {
       let newDisplayInput = "";
-      if (this.state.displayInput != "" && this.state.operationInput != "-") {
-        newDisplayInput = this.state.displayInput + "" + operation;
+      if (state.displayInput != "" && state.operatorInput != "-") {
+        newDisplayInput = state.displayInput + "" + operator;
       }
       let numberDataTypeValue: Number = null;
-      if (this.state.result !== "") {
-        numberDataTypeValue = this.state.result;
-        this.operand = numberDataTypeValue;
+      if (state.result !== "") {
+        numberDataTypeValue = state.result;
+        operand = numberDataTypeValue;
       } else {
-        numberDataTypeValue = this.state.numberInput;
-        this.operand = numberDataTypeValue;
+        numberDataTypeValue = state.numberInput;
+        operand = numberDataTypeValue;
       }
-      this.setState({
-        operationInput: operation,
+      setState({
+        ...state,
+        operatorInput: operator,
         numberInput: "",
         showClear: false,
-        displayInput: newDisplayInput
+        displayInput: newDisplayInput,
       });
     } else {
-      if (this.state.result) {
-        this.prevInput = this.state.result;
-        this.setState({
-          operationInput: "",
+      if (state.result) {
+        prevInput = state.result;
+        setState({
+          displayInput: state.result,
+          operatorInput: "",
           result: "",
           numberInput: "",
           showClear: true,
-          displayInput: this.state.result
+          ...state,
         });
       }
     }
   };
 
-  handleClearPress = () => {
-    this.operand = null;
-    this.prevInput = null;
-    this.prevOp = null;
-    this.setState({
-      result: "",
-      numberInput: "",
-      operationInput: "",
-      showClear: false,
-      displayInput: ""
-    });
-  };
-
-  handleDeletePress = () => {
-    let newDisplayInput = "";
-    if (null !== this.prevInput) {
-      var isnum = /^\d+$/.test(this.state.displayInput);
-      newDisplayInput = this.state.displayInput.slice(0, isnum ? -2 : -1);
-    } else {
-      newDisplayInput = this.state.displayInput.slice(0, -1);
-    }
-    // return this.performOperation(newNumberInput, this.prevOp);
-    this.setState({
-      displayInput: newDisplayInput
-    });
-  };
-
-  performOperation = (value: Number, operation: String) => {
-    let newOperand = parseFloat(this.operand);
-    if (this.prevInput) {
-      newOperand = parseFloat(this.prevInput);
+  const performOperation = (value: Number, operator: String) => {
+    let newOperand = parseFloat(operand);
+    if (prevInput) {
+      newOperand = parseFloat(prevInput);
     }
     let newValue = parseFloat(value);
-    this.prevInput = newOperand;
-    this.prevOp = operation;
-    switch (operation) {
+    prevInput = newOperand;
+    prevOp = operator;
+    switch (operator) {
       case "=":
         newOperand = newValue;
         break;
@@ -147,217 +141,86 @@ export default class App extends React.Component {
         newOperand = newValue;
     }
     let result: String = newOperand;
-    this.setState({
+    setState({
+      ...state,
       result,
       newNumber: "",
       showClear: false,
-      operationInput: ""
+      operatorInput: "",
     });
   };
 
-  render() {
-    const { result, displayInput } = this.state;
-    return (
-      <View style={styles.container}>
-        <View style={styles.displayLayout}>
-          <Text style={styles.displayInput}>{displayInput}</Text>
-          <Text style={styles.displayResult}>{result}</Text>
-        </View>
-        <View style={styles.inputKeyButtonLayout}>
-          <View style={styles.inputNumberLayout}>
-            <View style={styles.inputNumberItem}>
-              <Button
-                title="1"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(1)}
-              />
-              <Button
-                title="2"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(2)}
-              />
-              <Button
-                title="3"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(3)}
-              />
-            </View>
-            <View style={styles.inputNumberItem}>
-              <Button
-                title="4"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(4)}
-              />
-              <Button
-                title="5"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(5)}
-              />
-              <Button
-                title="6"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(6)}
-              />
-            </View>
-            <View style={styles.inputNumberItem}>
-              <Button
-                title="7"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(7)}
-              />
-              <Button
-                title="8"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(8)}
-              />
-              <Button
-                title="9"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(9)}
-              />
-            </View>
-            <View style={styles.inputNumberItem}>
-              <Button
-                title="."
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(".")}
-              />
-              <Button
-                title="0"
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleNumberPress(0)}
-              />
-              <Button
-                title="="
-                titleStyle={styles.inputNumberItemTitleStyle}
-                buttonStyle={styles.inputNumberItemButtonStyle}
-                onPress={() => this.handleOperationPress("=")}
-              />
-            </View>
-          </View>
-          <View style={styles.inputOperationLayout}>
-            <Button
-              title={this.state.showClear ? "CLR" : "DEL"}
-              titleStyle={{ fontSize: 20 }}
-              buttonStyle={styles.inputOperationButtonStyle}
-              onPress={() => {
-                this.state.showClear
-                  ? this.handleClearPress()
-                  : this.handleDeletePress();
-              }}
-            />
-            <Button
-              title="÷"
-              titleStyle={{ fontSize: 30 }}
-              buttonStyle={styles.inputOperationButtonStyle}
-              onPress={() => this.handleOperationPress("÷")}
-            />
-            <Button
-              title="x"
-              titleStyle={{ fontSize: 20 }}
-              buttonStyle={styles.inputOperationButtonStyle}
-              onPress={() => this.handleOperationPress("x")}
-            />
-            <Button
-              title="-"
-              titleStyle={{ fontSize: 20 }}
-              buttonStyle={styles.inputOperationButtonStyle}
-              onPress={() => this.handleOperationPress("-")}
-            />
-            <Button
-              title="+"
-              titleStyle={{ fontSize: 20 }}
-              buttonStyle={styles.inputOperationButtonStyle}
-              onPress={() => this.handleOperationPress("+")}
-            />
-          </View>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              flexBasis: "5%",
-              backgroundColor: "red"
-            }}
+  const handleClearPress = () => {
+    operand = null;
+    prevInput = null;
+    prevOp = null;
+    setState({
+      ...state,
+      result: "",
+      numberInput: "",
+      operatorInput: "",
+      showClear: false,
+      displayInput: "",
+    });
+  };
+
+  const handleDeletePress = () => {
+    let newDisplayInput = "";
+    if (null !== prevInput) {
+      var isnum = /^\d+$/.test(state.displayInput);
+      newDisplayInput = state.displayInput.slice(0, isnum ? -2 : -1);
+    } else {
+      newDisplayInput = state.displayInput.slice(0, -1);
+    }
+    // return performOperation(newNumberInput, prevOp);
+    setState({
+      ...state,
+      displayInput: newDisplayInput,
+    });
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {state.isFontLoaded ? (
+        <Fragment>
+          <DisplayScreen
+            result={state.result}
+            displayInput={state.displayInput}
           />
-        </View>
-      </View>
-    );
-  }
-}
+          <View style={styles.keyPadLayout}>
+            <GridKeys
+              data={data.grid}
+              handleNumberPress={handleNumberPress}
+              handleOperationPress={handleOperationPress}
+            />
+            <ColKeys
+              data={data.col}
+              showClear={state.showClear}
+              handleOperationPress={handleOperationPress}
+              handleClearPress={handleClearPress}
+              handleDeletePress={handleDeletePress}
+            />
+            <HiddenGridButtons />
+          </View>
+        </Fragment>
+      ) : (
+        <Text>{""}</Text>
+      )}
+    </SafeAreaView>
+  );
+};
+
+export default App;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    paddingTop: Constants.statusBarHeight,
-    backgroundColor: "#ecf0f1"
+    backgroundColor: "#ecf0f1",
   },
-  displayLayout: {
-    flex: 1,
-    flexDirection: "column",
-    backgroundColor: "powderblue",
-    paddingTop: 50,
-    paddingLeft: 10,
-    paddingRight: 10
-  },
-  displayInput: {
-    alignSelf: "flex-end",
-    fontSize: 70
-  },
-  displayResult: {
-    alignSelf: "flex-end",
-    fontSize: 40
-  },
-  inputKeyButtonLayout: {
+  keyPadLayout: {
     flex: 2,
     flexDirection: "row",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
-  inputNumberLayout: {
-    flex: 1,
-    flexBasis: "67%",
-    backgroundColor: "skyblue"
-  },
-  inputNumberItem: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    flexWrap: "wrap"
-  },
-  inputNumberItemTitleStyle: {
-    fontSize: 50,
-    textAlign: "center"
-  },
-  inputNumberItemButtonStyle: {
-    borderRadius: 0,
-    paddingRight: 20,
-    paddingLeft: 20,
-    backgroundColor: "transparent"
-  },
-  inputOperationLayout: {
-    flex: 1,
-    flexDirection: "column",
-    flexBasis: "28%",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 10,
-    paddingBottom: 10,
-    backgroundColor: "blue"
-  },
-  inputOperationButtonStyle: {
-    borderRadius: 0,
-    backgroundColor: "transparent",
-    padding: 20
-  }
 });
