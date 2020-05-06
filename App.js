@@ -1,13 +1,13 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Alert, Text, View, SafeAreaView, StyleSheet } from "react-native";
 import * as Font from "expo-font";
-import { Button } from "react-native-elements";
 
 // Components
 import DisplayScreen from "./components/DisplayScreen";
 import GridKeys from "./components/GridKeys";
 import ColKeys from "./components/ColKeys";
 import HiddenGridButtons from "./components/HiddenGridButtons";
+import Button from "./components/Button";
 
 //button data {}
 import data from "./constants/button.json";
@@ -15,12 +15,18 @@ import data from "./constants/button.json";
 const App = () => {
   const [state, setState] = useState({
     isFontLoaded: false,
-    displayInput: "6x3",
-    result: "18",
+    result: "",
     numberInput: "",
     operatorInput: "",
     showClear: false,
+    clearScreen: false,
   });
+
+  const [displayInput, setDisplayInput]: String = useState("");
+  const [clearScreen, setClearScreen] = useState(false);
+  const [operand, setOperand]: Number = useState(null);
+  const [prevInput, setPrevInput]: Number = useState(null);
+  const [prevOp, setPrevOp]: String = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -32,18 +38,12 @@ const App = () => {
     })();
   }, []);
 
-  let operand: Number = null;
-  let prevInput: Number = null;
-  let prevOp: String = null;
-
   const handleNumberPress = (value) => {
     let newNumberInput: Number = null;
     let newDisplayInput: Number = null;
     if (value == "." && state.numberInput.includes(".")) return;
     newDisplayInput =
-      state.displayInput == "0" && value != "."
-        ? value
-        : state.displayInput + "" + value;
+      displayInput == "0" && value != "." ? value : displayInput + "" + value;
     newNumberInput =
       state.numberInput == "0" && value != "."
         ? value
@@ -51,22 +51,22 @@ const App = () => {
 
     if (state.result !== "" && state.operatorInput === "") {
       if (value == ".") {
-        newDisplayInput = state.displayInput + ".";
+        newDisplayInput = displayInput + ".";
         newNumberInput = state.numberInput + ".";
       }
+      setDisplayInput(newDisplayInput);
       setState({
         ...state,
         numberInput: newNumberInput,
-        displayInput: newDisplayInput,
       });
       return performOperation(newNumberInput, prevOp);
     } else if (state.result !== "" && state.operatorInput !== "") {
-      prevInput = state.result;
+      setPrevInput(state.result);
     }
+    setDisplayInput(newDisplayInput);
     setState({
       ...state,
       numberInput: newNumberInput,
-      displayInput: newDisplayInput,
     });
     if (null != operand) {
       performOperation(value, state.operatorInput);
@@ -76,34 +76,35 @@ const App = () => {
   const handleOperationPress = (operator) => {
     if (operator !== "=") {
       let newDisplayInput = "";
-      if (state.displayInput != "" && state.operatorInput != "-") {
-        newDisplayInput = state.displayInput + "" + operator;
+      if (displayInput != "" && state.operatorInput != "-") {
+        newDisplayInput = displayInput + "" + operator;
       }
       let numberDataTypeValue: Number = null;
       if (state.result !== "") {
         numberDataTypeValue = state.result;
-        operand = numberDataTypeValue;
+        setOperand(numberDataTypeValue);
       } else {
         numberDataTypeValue = state.numberInput;
-        operand = numberDataTypeValue;
+        setOperand(numberDataTypeValue);
       }
+
+      setDisplayInput(newDisplayInput);
       setState({
         ...state,
         operatorInput: operator,
         numberInput: "",
         showClear: false,
-        displayInput: newDisplayInput,
       });
     } else {
       if (state.result) {
-        prevInput = state.result;
+        setPrevInput(state.result);
+        setDisplayInput(state.result);
         setState({
-          displayInput: state.result,
+          ...state,
           operatorInput: "",
           result: "",
           numberInput: "",
           showClear: true,
-          ...state,
         });
       }
     }
@@ -115,8 +116,8 @@ const App = () => {
       newOperand = parseFloat(prevInput);
     }
     let newValue = parseFloat(value);
-    prevInput = newOperand;
-    prevOp = operator;
+    setPrevInput(newOperand);
+    setPrevOp(operator);
     switch (operator) {
       case "=":
         newOperand = newValue;
@@ -151,32 +152,30 @@ const App = () => {
   };
 
   const handleClearPress = () => {
-    operand = null;
-    prevInput = null;
-    prevOp = null;
+    if (displayInput || state.result) setClearScreen(true);
+    setOperand(null);
+    setPrevInput(null);
+    setPrevOp(null);
+    setDisplayInput("");
     setState({
       ...state,
       result: "",
       numberInput: "",
       operatorInput: "",
       showClear: false,
-      displayInput: "",
     });
   };
 
   const handleDeletePress = () => {
     let newDisplayInput = "";
     if (null !== prevInput) {
-      var isnum = /^\d+$/.test(state.displayInput);
-      newDisplayInput = state.displayInput.slice(0, isnum ? -2 : -1);
+      var isnum = /^\d+$/.test(displayInput);
+      newDisplayInput = displayInput.slice(0, isnum ? -2 : -1);
     } else {
-      newDisplayInput = state.displayInput.slice(0, -1);
+      newDisplayInput = displayInput.slice(0, -1);
     }
     // return performOperation(newNumberInput, prevOp);
-    setState({
-      ...state,
-      displayInput: newDisplayInput,
-    });
+    setDisplayInput(newDisplayInput);
   };
 
   return (
@@ -185,7 +184,9 @@ const App = () => {
         <Fragment>
           <DisplayScreen
             result={state.result}
-            displayInput={state.displayInput}
+            displayInput={displayInput}
+            clearScreen={clearScreen}
+            setClearScreen={setClearScreen}
           />
           <View style={styles.keyPadLayout}>
             <GridKeys

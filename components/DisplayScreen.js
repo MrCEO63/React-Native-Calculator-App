@@ -2,7 +2,14 @@ import React from "react";
 import PropType from "prop-types";
 import { StyleSheet, Text, View } from "react-native";
 
-const DisplayScreen = ({ result, displayInput }) => {
+import ClearScreenAnimation from "./ClearScreenAnimation";
+
+const DisplayScreen = ({
+  result,
+  displayInput,
+  clearScreen,
+  setClearScreen,
+}) => {
   let displayInputFontSize = {};
   if (displayInput.length > 9 && displayInput.length < 12) {
     displayInputFontSize = { fontSize: 55 };
@@ -14,7 +21,7 @@ const DisplayScreen = ({ result, displayInput }) => {
 
   const formatDisplayInput = (number, condition) => {
     let num = number.toString();
-    if (num.length >= 17) {
+    if (num.length >= 17 && !condition) {
       num = num.slice(-16);
     }
     let parts = num.split(".");
@@ -24,14 +31,24 @@ const DisplayScreen = ({ result, displayInput }) => {
 
   return (
     <View style={styles.displayLayout}>
-      <Text
-        style={Object.assign({}, displayInputFontSize, styles.displayInput)}
-      >
-        {formatDisplayInput(displayInput)}
-      </Text>
-      <Text style={styles.displayResult}>
-        {formatDisplayInput(result, true)}
-      </Text>
+      {clearScreen ? (
+        <ClearScreenAnimation
+          color="#f3af27"
+          maxOpacity={1}
+          setClearScreen={setClearScreen}
+        />
+      ) : (
+        <>
+          <Text
+            style={Object.assign({}, displayInputFontSize, styles.displayInput)}
+          >
+            {formatDisplayInput(displayInput)}
+          </Text>
+          <Text style={styles.displayResult}>
+            {formatDisplayInput(result, true)}
+          </Text>
+        </>
+      )}
     </View>
   );
 };

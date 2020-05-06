@@ -14,7 +14,6 @@ const ColKeys = ({
     <View style={styles.columnContainer}>
       <Button
         text={showClear ? "CLR" : "DEL"}
-        buttonStyle={{}}
         textStyle={{ fontSize: 20, fontFamily: "OpenSans-Regular" }}
         onPress={() => {
           showClear ? handleClearPress() : handleDeletePress();
@@ -25,11 +24,9 @@ const ColKeys = ({
         <Button
           key={index}
           text={btn}
-          buttonStyle={{}}
-          viewStyle={styles.columnButtonView}
           textStyle={{ fontFamily: "OpenSans-Regular" }}
           onPress={() =>
-            btn === "=" ? handleOperationPress(btn) : handleNumberPress(btn)
+            btn === "=" ? handleOperationPress(btn) : handleOperationPress(btn)
           }
         />
       ))}
@@ -56,6 +53,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 10,
     paddingBottom: 10,
-    backgroundColor: "rgba(188, 188, 188, 0.8)",
+    backgroundColor: "rgb(188, 188, 188)",
   },
 });

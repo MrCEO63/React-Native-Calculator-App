@@ -5,31 +5,27 @@ import {
   View,
   Platform,
   StyleSheet,
-  TouchableOpacity,
   TouchableNativeFeedback,
 } from "react-native";
 
-const Button = ({
-  text,
-  textStyle,
-  viewStyle,
-  buttonStyle,
-  onPress,
-  onLongPress,
-}) => {
+import TouchableIOSFeedback from "./TouchableIOSFeedback";
+
+const Button = ({ text, textStyle, viewStyle, onPress, onLongPress }) => {
   const background = (A) => A.Ripple("floralwhite", true);
 
   let Touchable =
-    Platform.OS === "ios" ? TouchableOpacity : TouchableNativeFeedback;
+    Platform.OS === "ios" ? TouchableIOSFeedback : TouchableNativeFeedback;
 
   let ApplyBG = Platform.OS === "ios" ? false : background(Touchable);
 
   return (
     <Touchable
-      style={buttonStyle}
       background={ApplyBG}
       onPress={onPress}
       onLongPress={onLongPress}
+      size={40}
+      color="floralwhite"
+      maxOpacity={0.25}
     >
       <View style={Object.assign({}, styles.view, viewStyle)}>
         <Text style={Object.assign({}, styles.text, textStyle)}>{text}</Text>
