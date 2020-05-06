@@ -1,7 +1,15 @@
-# My Phone 
+# REACT NATIVE CALCULATOR
 
-<img src="assets/phone-version.png" alt="My Phone" width="200" />
+This project is to replicate my phone calculator app using RN expo client
 
-# My Clone
+## My Phone Version
 
-<img src="assets/app-img.png" alt="My Phone" width="200" />
+<img src="assets/images/phone-version.jpeg" alt="My Phone Version" width="200" />
+
+## My React Native IOS Version
+
+<img src="assets/images/rn-ios.png" alt="My React Native IOS Version" width="200" />
+
+## My React Native Android Version
+
+<img src="assets/images/rn-android.jpeg" alt="My React Native Android Version" width="200" />

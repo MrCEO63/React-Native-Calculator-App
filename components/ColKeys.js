@@ -51,11 +51,11 @@ const styles = StyleSheet.create({
   columnContainer: {
     flex: 1,
     flexDirection: "column",
-    flexBasis: "26.5%",
+    flexBasis: "24%",
     justifyContent: "space-between",
     alignItems: "center",
     paddingTop: 10,
     paddingBottom: 10,
-    backgroundColor: "#bcbcbc",
+    backgroundColor: "rgba(188, 188, 188, 0.8)",
   },
 });

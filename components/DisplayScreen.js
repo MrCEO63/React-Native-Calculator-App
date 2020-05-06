@@ -1,7 +1,6 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
 import PropType from "prop-types";
-import merge from "lodash/merge";
+import { StyleSheet, Text, View } from "react-native";
 
 const DisplayScreen = ({ result, displayInput }) => {
   let displayInputFontSize = {};
@@ -13,18 +12,26 @@ const DisplayScreen = ({ result, displayInput }) => {
     displayInputFontSize = { fontSize: 70 };
   }
 
-  const numberWithCommas = (number) => {
-    let parts = number.toString().split(".");
+  const formatDisplayInput = (number, condition) => {
+    let num = number.toString();
+    if (num.length >= 17) {
+      num = num.slice(-16);
+    }
+    let parts = num.split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return parts.join(".");
   };
 
   return (
     <View style={styles.displayLayout}>
-      <Text style={merge(displayInputFontSize, styles.displayInput)}>
-        {numberWithCommas(displayInput)}
+      <Text
+        style={Object.assign({}, displayInputFontSize, styles.displayInput)}
+      >
+        {formatDisplayInput(displayInput)}
       </Text>
-      <Text style={styles.displayResult}>{result}</Text>
+      <Text style={styles.displayResult}>
+        {formatDisplayInput(result, true)}
+      </Text>
     </View>
   );
 };
@@ -41,10 +48,11 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     backgroundColor: "#ffffff",
-    paddingRight: 10,
+    paddingTop: 20,
+    paddingRight: 5,
   },
   displayInput: {
-    paddingTop: 60,
+    paddingTop: 50,
     alignSelf: "flex-end",
     fontFamily: "OpenSans-Light",
   },
@@ -52,6 +60,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     fontFamily: "OpenSans-Light",
     fontSize: 40,
-    paddingTop: 10,
+    paddingTop: 20,
+    color: "rgb(188, 188, 188)",
   },
 });

@@ -15,8 +15,8 @@ import data from "./constants/button.json";
 const App = () => {
   const [state, setState] = useState({
     isFontLoaded: false,
-    displayInput: "",
-    result: "",
+    displayInput: "6x3",
+    result: "18",
     numberInput: "",
     operatorInput: "",
     showClear: false,

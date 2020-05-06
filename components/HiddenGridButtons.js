@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
   hiddenGridButtons: {
     flex: 1,
     flexDirection: "column",
-    flexBasis: "5.5%",
+    flexBasis: "6%",
     backgroundColor: "#f3af27",
   },
 });

@@ -22,10 +22,12 @@ const Button = ({
   let Touchable =
     Platform.OS === "ios" ? TouchableOpacity : TouchableNativeFeedback;
 
+  let ApplyBG = Platform.OS === "ios" ? false : background(Touchable);
+
   return (
     <Touchable
       style={buttonStyle}
-      background={Platform.OS === "ios" ? false : background(Touchable)}
+      background={ApplyBG}
       onPress={onPress}
       onLongPress={onLongPress}
     >

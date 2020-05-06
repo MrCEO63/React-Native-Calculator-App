@@ -39,8 +39,8 @@ export default GridKeys;
 const styles = StyleSheet.create({
   gridContainer: {
     flex: 1,
-    flexBasis: "68%",
-    backgroundColor: "#949494",
+    flexBasis: "70%",
+    backgroundColor: "rgb(108, 108, 108)",
   },
   gridRow: {
     flex: 1,
