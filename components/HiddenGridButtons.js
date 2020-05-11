@@ -19,11 +19,13 @@ const HIDDEN_WIDTH = SCREEN_WIDTH - 100;
 
 const HiddenGrid = ({ data }) => {
   const [close, setClose] = useState(true);
+
+  const _animatedContainer = useRef(
+    new Animated.ValueXY({ x: SCREEN_WIDTH - 20, y: 0 })
+  ).current;
+
   const _animatedHidden = useRef(
     new Animated.ValueXY({ x: HIDDEN_WIDTH - 20, y: 0 })
-  ).current;
-  const _animatedOverlay = useRef(
-    new Animated.ValueXY({ x: SCREEN_WIDTH, y: 0 })
   ).current;
 
   const panResponder = useRef(
@@ -34,55 +36,57 @@ const HiddenGrid = ({ data }) => {
       },
       onPanResponderGrant: () => {
         _animatedHidden.setOffset({ x: _animatedHidden.x._value, y: 0 });
-        _animatedOverlay.setOffset({ x: _animatedOverlay.x._value, y: 0 });
+        _animatedContainer.setOffset({ x: _animatedContainer.x._value, y: 0 });
       },
       onPanResponderMove: (event, gestureState) => {
         if (gestureState.dx < 0) {
           if (gestureState.dx > -300) {
             _animatedHidden.setValue({ x: gestureState.dx, y: 0 });
+            _animatedContainer.setValue({ x: gestureState.dx, y: 0 });
           }
         } else if (gestureState.dx > 0) {
           _animatedHidden.setValue({ x: gestureState.dx, y: 0 });
+          _animatedContainer.setValue({ x: gestureState.dx, y: 0 });
         }
       },
       onPanResponderRelease: (event, gestureState) => {
         _animatedHidden.flattenOffset();
-        _animatedOverlay.flattenOffset();
+        _animatedContainer.flattenOffset();
         if (gestureState.dx < 0) {
           if (-gestureState.dx < 100) {
+            Animated.timing(_animatedContainer.x, {
+              toValue: SCREEN_WIDTH - 20,
+              duration: 0,
+            }).start();
             Animated.timing(_animatedHidden.x, {
               toValue: HIDDEN_WIDTH - 20,
               duration: 200,
               easing: Easing.linear,
             }).start();
-            Animated.timing(_animatedOverlay.x, {
-              toValue: SCREEN_WIDTH,
-              duration: 0,
-            }).start();
           } else {
+            Animated.timing(_animatedContainer.x, {
+              toValue: -SCREEN_WIDTH,
+              duration: 0,
+            }).start(() => {
+              setClose(false);
+            });
             Animated.timing(_animatedHidden.x, {
               toValue: 0,
               duration: 200,
               easing: Easing.linear,
-            }).start(() => {
-              setClose(false);
-            });
-            Animated.timing(_animatedOverlay.x, {
-              toValue: -SCREEN_WIDTH,
-              duration: 0,
             }).start();
           }
         } else if (gestureState.dx > 0) {
+          Animated.timing(_animatedContainer.x, {
+            toValue: SCREEN_WIDTH - 20,
+            duration: 0,
+          }).start(() => {
+            setClose(true);
+          });
           Animated.timing(_animatedHidden.x, {
             toValue: HIDDEN_WIDTH - 20,
             duration: 200,
             easing: Easing.linear,
-          }).start(() => {
-            setClose(true);
-          });
-          Animated.timing(_animatedOverlay.x, {
-            toValue: SCREEN_WIDTH,
-            duration: 0,
           }).start();
         }
       },
@@ -91,28 +95,28 @@ const HiddenGrid = ({ data }) => {
 
   const toggleHidden = () => {
     if (close) {
+      Animated.timing(_animatedContainer.x, {
+        toValue: -SCREEN_WIDTH,
+        duration: 0,
+      }).start(() => {
+        setClose(false);
+      });
       Animated.timing(_animatedHidden.x, {
         toValue: 0,
         easing: Easing.linear,
         duration: 200,
-      }).start(() => {
-        setClose(false);
-      });
-      Animated.timing(_animatedOverlay.x, {
-        toValue: -SCREEN_WIDTH,
-        duration: 0,
       }).start();
     } else {
+      Animated.timing(_animatedContainer.x, {
+        toValue: SCREEN_WIDTH - 20,
+        duration: 0,
+      }).start(() => {
+        setClose(true);
+      });
       Animated.timing(_animatedHidden.x, {
         toValue: HIDDEN_WIDTH - 20,
         easing: Easing.linear,
         duration: 200,
-      }).start(() => {
-        setClose(true);
-      });
-      Animated.timing(_animatedOverlay.x, {
-        toValue: SCREEN_WIDTH,
-        duration: 0,
       }).start();
     }
   };
@@ -130,10 +134,14 @@ const HiddenGrid = ({ data }) => {
     ],
   };
 
-  const animatedOverlay = {
+  const animatedContainer = {
+    backgroundColor: _animatedContainer.x.interpolate({
+      inputRange: [0, SCREEN_WIDTH],
+      outputRange: ["rgba(0, 0, 0, 0.8)", "#f3af27"],
+    }),
     transform: [
       {
-        translateX: _animatedOverlay.x.interpolate({
+        translateX: _animatedContainer.x.interpolate({
           inputRange: [0, SCREEN_WIDTH],
           outputRange: [0, SCREEN_WIDTH],
           extrapolate: "clamp",
@@ -141,22 +149,12 @@ const HiddenGrid = ({ data }) => {
       },
       { translateY: 0 },
     ],
-    opacity: _animatedOverlay.x.interpolate({
-      inputRange: [0, SCREEN_WIDTH],
-      outputRange: [0.6, 0],
-      extrapolate: "clamp",
-    }),
-    backgroundColor: _animatedOverlay.x.interpolate({
-      inputRange: [0, SCREEN_WIDTH],
-      outputRange: ["rgb(0, 0, 0.5)", "rgb(0, 0, 0.1)"],
-    }),
   };
 
   return (
     <View {...panResponder.panHandlers} style={styles.container}>
       <TouchableWithoutFeedback onPress={toggleHidden}>
-        <View style={{ flex: 1 }}>
-          <Animated.View style={[animatedOverlay, styles.opacityContainer]} />
+        <Animated.View style={[animatedContainer, styles.backgroundContainer]}>
           <Animated.View style={[animatedHidden, styles.gridContainer]}>
             {data.map((btns, i) => (
               <View style={styles.gridRow} key={i}>
@@ -172,7 +170,7 @@ const HiddenGrid = ({ data }) => {
               </View>
             ))}
           </Animated.View>
-        </View>
+        </Animated.View>
       </TouchableWithoutFeedback>
     </View>
   );
@@ -192,20 +190,17 @@ const styles = StyleSheet.create({
     height: "100%",
     right: 0,
   },
-  opacityContainer: {
+  backgroundContainer: {
     flex: 1,
-    position: "absolute",
-    height: "100%",
     width: SCREEN_WIDTH,
-    right: 0,
   },
   gridContainer: {
     flex: 1,
     backgroundColor: "#f3af27",
     position: "absolute",
+    width: HIDDEN_WIDTH,
     height: "100%",
     right: 0,
-    width: HIDDEN_WIDTH,
   },
   gridRow: {
     flex: 1,
