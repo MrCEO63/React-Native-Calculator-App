@@ -1,15 +1,12 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { Alert, Text, View, SafeAreaView, StyleSheet } from "react-native";
+import { Alert, Text, View, StyleSheet } from "react-native";
 import * as Font from "expo-font";
 
 // Components
 import DisplayScreen from "./components/DisplayScreen";
-import GridKeys from "./components/GridKeys";
-import ColKeys from "./components/ColKeys";
-import HiddenGridButtons from "./components/HiddenGridButtons";
-import Button from "./components/Button";
+import KeyboardLayout from "./components/KeyboardLayout";
 
-//button data {}
+// Button data {}
 import data from "./constants/button.json";
 
 const App = () => {
@@ -23,7 +20,7 @@ const App = () => {
   });
 
   const [displayInput, setDisplayInput]: String = useState("");
-  const [clearScreen, setClearScreen] = useState(false);
+  const [clearScreen, setClearScreen]: Boolean = useState(false);
   const [operand, setOperand]: Number = useState(null);
   const [prevInput, setPrevInput]: Number = useState(null);
   const [prevOp, setPrevOp]: String = useState(null);
@@ -179,7 +176,7 @@ const App = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {state.isFontLoaded ? (
         <Fragment>
           <DisplayScreen
@@ -188,26 +185,18 @@ const App = () => {
             clearScreen={clearScreen}
             setClearScreen={setClearScreen}
           />
-          <View style={styles.keyPadLayout}>
-            <GridKeys
-              data={data.grid}
-              handleNumberPress={handleNumberPress}
-              handleOperationPress={handleOperationPress}
-            />
-            <ColKeys
-              data={data.col}
-              showClear={state.showClear}
-              handleOperationPress={handleOperationPress}
-              handleClearPress={handleClearPress}
-              handleDeletePress={handleDeletePress}
-            />
-            <HiddenGridButtons />
-          </View>
+          <KeyboardLayout
+            state={state}
+            handleNumberPress={handleNumberPress}
+            handleOperationPress={handleOperationPress}
+            handleClearPress={handleClearPress}
+            handleDeletePress={handleDeletePress}
+          />
         </Fragment>
       ) : (
         <Text>{""}</Text>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -218,10 +207,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     backgroundColor: "#ecf0f1",
-  },
-  keyPadLayout: {
-    flex: 2,
-    flexDirection: "row",
-    flexWrap: "wrap",
   },
 });

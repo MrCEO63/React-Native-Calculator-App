@@ -48,11 +48,13 @@ const styles = StyleSheet.create({
   columnContainer: {
     flex: 1,
     flexDirection: "column",
-    flexBasis: "24%",
+    height: "100%",
+    flexBasis: "25%",
     justifyContent: "space-between",
     alignItems: "center",
     paddingTop: 10,
     paddingBottom: 10,
+    paddingRight: 20,
     backgroundColor: "rgb(188, 188, 188)",
   },
 });

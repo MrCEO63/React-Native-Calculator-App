@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PropType from "prop-types";
 import {
   View,
@@ -65,7 +65,6 @@ const TouchableIOSFeedback = ({
   };
 
   const containerSize = size * 2;
-  const iconContainer = { width: containerSize, height: containerSize };
 
   return (
     <TouchableWithoutFeedback
@@ -73,7 +72,7 @@ const TouchableIOSFeedback = ({
       onPressOut={onPressedOut}
       {...props}
     >
-      <View style={iconContainer}>
+      <View style={{ width: containerSize, height: containerSize }}>
         {renderRippleView()}
         {children}
       </View>

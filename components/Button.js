@@ -27,8 +27,8 @@ const Button = ({ text, textStyle, viewStyle, onPress, onLongPress }) => {
       color="floralwhite"
       maxOpacity={0.25}
     >
-      <View style={Object.assign({}, styles.view, viewStyle)}>
-        <Text style={Object.assign({}, styles.text, textStyle)}>{text}</Text>
+      <View style={[styles.view, viewStyle]}>
+        <Text style={[styles.text, textStyle]}>{text}</Text>
       </View>
     </Touchable>
   );
